@@ -22,6 +22,7 @@ const MembersData = () => {
   const [editMode, setEditMode] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [paginationData, setPaginationData] = useState(membersData);
 
   // Table Columns
   const columns = [
@@ -157,25 +158,27 @@ const MembersData = () => {
   ];
 
   const handleDeleteBtn = (id) => {
-    setMembersData(membersData.filter((item) => item.id !== id));
     setCurrentPage(1);
     paginationComp();
+    setMembersData(membersData.filter((item) => item.id !== id));
+    setPaginationData(paginationData.filter((item) => item.id !== id));
   };
 
   const handleMulDeleteRows = () => {
     setIsShowModal(false);
-    setMembersData(membersData.filter((item) => !selectedRows.includes(item)));
-    setSelectedRows([]);
     setCurrentPage(1);
     paginationComp();
+    setMembersData(membersData.filter((item) => !selectedRows.includes(item)));
+    setPaginationData(paginationData.filter((item) => !selectedRows.includes(item)));
+    setSelectedRows([]);
   };
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
+    setCurrentPage(1);
 
     if (e.target.value === "") {
       setMembersData(originalData);
-      setCurrentPage(1);
     } else {
       setMembersData(
         originalData.filter(
@@ -184,9 +187,14 @@ const MembersData = () => {
             item.name.toLowerCase().includes(e.target.value.toLowerCase()) ||
             item.email.toLowerCase().includes(e.target.value.toLowerCase()) ||
             item.role.toLowerCase().includes(e.target.value.toLowerCase())
-        )
-      );
-      setCurrentPage(1);
+        ))
+      setPaginationData(originalData.filter(
+        (item) =>
+          item.id.toLowerCase().includes(e.target.value.toLowerCase()) ||
+          item.name.toLowerCase().includes(e.target.value.toLowerCase()) ||
+          item.email.toLowerCase().includes(e.target.value.toLowerCase()) ||
+          item.role.toLowerCase().includes(e.target.value.toLowerCase())
+      ));
       paginationComp();
     }
   };
@@ -204,6 +212,7 @@ const MembersData = () => {
     const data = await response.json();
     setMembersData(data);
     setOriginalData(data);
+    setPaginationData(data);
   };
 
   useEffect(() => {
@@ -218,7 +227,7 @@ const MembersData = () => {
             className="text-md font-semibold text-gray-600 mx-2 disabled:opacity-50  first-page"
             onClick={() => {
               setCurrentPage(1);
-              setMembersData(membersData.slice(0, 10));
+              setMembersData(paginationData.slice(0, 10));
             }}
             disabled={currentPage == 1}
           >
@@ -227,7 +236,7 @@ const MembersData = () => {
 
           <div>
             {Array.from(
-              { length: Math.ceil(membersData.length / 10) },
+              { length: Math.ceil(paginationData.length / 10) },
               (_, i) => (
                 <button
                   key={i + 1}
@@ -236,7 +245,7 @@ const MembersData = () => {
                   onClick={(e) => {
                     setCurrentPage(parseInt(e.target.value));
                     setMembersData(
-                      membersData.slice(
+                      paginationData.slice(
                         (parseInt(e.target.value) - 1) * 10,
                         parseInt(e.target.value) * 10
                       )
@@ -252,15 +261,15 @@ const MembersData = () => {
           <button
             className="text-md font-semibold text-gray-600 mx-2 disabled:opacity-50 last-page"
             onClick={() => {
-              setCurrentPage(Math.ceil(membersData.length / 10));
+              setCurrentPage(Math.ceil(paginationData.length / 10));
               setMembersData(
-                membersData.slice(
-                  (Math.ceil(membersData.length / 10) - 1) * 10,
-                  Math.ceil(membersData.length / 10) * 10
+                paginationData.slice(
+                  (Math.ceil(paginationData.length / 10) - 1) * 10,
+                  Math.ceil(paginationData.length / 10) * 10
                 )
               );
             }}
-            disabled={currentPage === Math.ceil(membersData.length / 10)}
+            disabled={currentPage === Math.ceil(paginationData.length / 10)}
           >
             <ChevronLast />
           </button>
