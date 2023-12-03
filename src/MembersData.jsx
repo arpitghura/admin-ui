@@ -158,12 +158,16 @@ const MembersData = () => {
 
   const handleDeleteBtn = (id) => {
     setMembersData(membersData.filter((item) => item.id !== id));
+    setCurrentPage(1);
+    paginationComp();
   };
 
   const handleMulDeleteRows = () => {
     setIsShowModal(false);
     setMembersData(membersData.filter((item) => !selectedRows.includes(item)));
     setSelectedRows([]);
+    setCurrentPage(1);
+    paginationComp();
   };
 
   const handleSearch = (e) => {
@@ -171,6 +175,7 @@ const MembersData = () => {
 
     if (e.target.value === "") {
       setMembersData(originalData);
+      setCurrentPage(1);
     } else {
       setMembersData(
         originalData.filter(
@@ -181,6 +186,8 @@ const MembersData = () => {
             item.role.toLowerCase().includes(e.target.value.toLowerCase())
         )
       );
+      setCurrentPage(1);
+      paginationComp();
     }
   };
 
@@ -211,7 +218,7 @@ const MembersData = () => {
             className="text-md font-semibold text-gray-600 mx-2 disabled:opacity-50  first-page"
             onClick={() => {
               setCurrentPage(1);
-              setMembersData(originalData.slice(0, 10));
+              setMembersData(membersData.slice(0, 10));
             }}
             disabled={currentPage == 1}
           >
@@ -220,7 +227,7 @@ const MembersData = () => {
 
           <div>
             {Array.from(
-              { length: Math.ceil(originalData.length / 10) },
+              { length: Math.ceil(membersData.length / 10) },
               (_, i) => (
                 <button
                   key={i + 1}
@@ -229,7 +236,7 @@ const MembersData = () => {
                   onClick={(e) => {
                     setCurrentPage(parseInt(e.target.value));
                     setMembersData(
-                      originalData.slice(
+                      membersData.slice(
                         (parseInt(e.target.value) - 1) * 10,
                         parseInt(e.target.value) * 10
                       )
@@ -245,15 +252,15 @@ const MembersData = () => {
           <button
             className="text-md font-semibold text-gray-600 mx-2 disabled:opacity-50 last-page"
             onClick={() => {
-              setCurrentPage(Math.ceil(originalData.length / 10));
+              setCurrentPage(Math.ceil(membersData.length / 10));
               setMembersData(
-                originalData.slice(
-                  (Math.ceil(originalData.length / 10) - 1) * 10,
-                  Math.ceil(originalData.length / 10) * 10
+                membersData.slice(
+                  (Math.ceil(membersData.length / 10) - 1) * 10,
+                  Math.ceil(membersData.length / 10) * 10
                 )
               );
             }}
-            disabled={currentPage === Math.ceil(originalData.length / 10)}
+            disabled={currentPage === Math.ceil(membersData.length / 10)}
           >
             <ChevronLast />
           </button>
