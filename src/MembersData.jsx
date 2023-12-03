@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from "react";
 import DataTable from "react-data-table-component";
-import { Trash2, Pencil, Search, Save } from "lucide-react";
+import {
+  Trash2,
+  Pencil,
+  Search,
+  Save,
+  ChevronLast,
+  ChevronFirst,
+} from "lucide-react";
 
 const MembersData = () => {
   const [originalData, setOriginalData] = useState([]);
@@ -8,11 +15,13 @@ const MembersData = () => {
 
   const [selectedRows, setSelectedRows] = useState([]);
   const [isShowModal, setIsShowModal] = useState(false);
-  
+
   const [searchQuery, setSearchQuery] = useState("");
-  
+
   const [editingId, setEditingId] = useState(null);
   const [editMode, setEditMode] = useState(false);
+
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Table Columns
   const columns = [
@@ -118,8 +127,8 @@ const MembersData = () => {
         };
 
         return (
-          <div className="flex ml-14">
-            {(editMode && editingId === rowData.id) ? (
+          <div className="flex ml-14 my-1">
+            {editMode && editingId === rowData.id ? (
               <button
                 className="bg-green-500 hover:bg-green-700 text-white p-4 rounded-full m-1 save"
                 onClick={() => handleSaveClick()}
@@ -193,7 +202,65 @@ const MembersData = () => {
   useEffect(() => {
     fetchData();
   }, []);
-  
+
+  const paginationComp = () => {
+    return (
+      <div className="flex justify-end items-center">
+        <div className="flex items-center">
+          <button
+            className="text-md font-semibold text-gray-600 mx-2 disabled:opacity-50  first-page"
+            onClick={() => {
+              setCurrentPage(1);
+              setMembersData(originalData.slice(0, 10));
+            }}
+            disabled={currentPage == 1}
+          >
+            <ChevronFirst />
+          </button>
+
+          <div>
+            {Array.from(
+              { length: Math.ceil(originalData.length / 10) },
+              (_, i) => (
+                <button
+                  key={i + 1}
+                  value={i + 1}
+                  className="text-md font-semibold text-gray-600 border-2 border-gray-600 rounded-md px-2 py-1 m-2 "
+                  onClick={(e) => {
+                    setCurrentPage(parseInt(e.target.value));
+                    setMembersData(
+                      originalData.slice(
+                        (parseInt(e.target.value) - 1) * 10,
+                        parseInt(e.target.value) * 10
+                      )
+                    );
+                  }}
+                >
+                  {i + 1}
+                </button>
+              )
+            )}
+          </div>
+
+          <button
+            className="text-md font-semibold text-gray-600 mx-2 disabled:opacity-50 last-page"
+            onClick={() => {
+              setCurrentPage(Math.ceil(originalData.length / 10));
+              setMembersData(
+                originalData.slice(
+                  (Math.ceil(originalData.length / 10) - 1) * 10,
+                  Math.ceil(originalData.length / 10) * 10
+                )
+              );
+            }}
+            disabled={currentPage === Math.ceil(originalData.length / 10)}
+          >
+            <ChevronLast />
+          </button>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <>
@@ -217,13 +284,15 @@ const MembersData = () => {
         </button>
       </div>
 
-      <div className="px-4 w-full">
+      <div className="px-4 w-full h-full">
         <DataTable
           title="Members Data"
           columns={columns}
           data={membersData}
           pagination
           paginationPerPage={10}
+          paginationComponent={paginationComp}
+          fixedHeader
           highlightOnHover
           responsive
           actions={
